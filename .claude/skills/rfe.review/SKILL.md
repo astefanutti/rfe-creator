@@ -23,30 +23,8 @@ Check if a prior review report exists at `artifacts/rfe-review-report.md`. If it
 
 ## Step 1.5: Fetch Architecture Context
 
-Fetch only the latest RHOAI architecture version from the architecture-context repo using a sparse checkout:
-
 ```bash
-# Step 1: Find the latest rhoai-* folder via GitHub API
-LATEST=$(curl -sL https://api.github.com/repos/opendatahub-io/architecture-context/contents/architecture | jq -r '[.[] | select(.name | startswith("rhoai-")) | .name] | sort | last')
-
-if [ -z "$LATEST" ] || [ "$LATEST" = "null" ]; then
-  echo "Could not detect latest architecture version"
-else
-  # Step 2: Sparse checkout just that folder
-  mkdir -p .context
-  if [ -d .context/architecture-context ]; then
-    cd .context/architecture-context
-    git sparse-checkout set "architecture/$LATEST"
-    git pull --quiet
-    cd -
-  else
-    git clone --depth 1 --filter=blob:none --sparse https://github.com/opendatahub-io/architecture-context .context/architecture-context
-    cd .context/architecture-context
-    git sparse-checkout set "architecture/$LATEST"
-    cd -
-  fi
-  echo "Architecture context ready: .context/architecture-context/architecture/$LATEST"
-fi
+bash scripts/fetch-architecture-context.sh
 ```
 
 The architecture context path for the feasibility fork is `.context/architecture-context/architecture/$LATEST`.

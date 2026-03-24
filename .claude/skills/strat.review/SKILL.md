@@ -15,27 +15,8 @@ Check if a prior review report exists at `artifacts/strat-review-report.md`. If 
 
 ## Step 2: Fetch Architecture Context
 
-Fetch architecture context using the same approach as `/rfe.review`:
-
 ```bash
-LATEST=$(curl -sL https://api.github.com/repos/opendatahub-io/architecture-context/contents/architecture | jq -r '[.[] | select(.name | startswith("rhoai-")) | .name] | sort | last')
-
-if [ -z "$LATEST" ] || [ "$LATEST" = "null" ]; then
-  echo "Could not detect latest architecture version"
-else
-  mkdir -p .context
-  if [ -d .context/architecture-context ]; then
-    cd .context/architecture-context
-    git sparse-checkout set "architecture/$LATEST"
-    git pull --quiet
-    cd -
-  else
-    git clone --depth 1 --filter=blob:none --sparse https://github.com/opendatahub-io/architecture-context .context/architecture-context
-    cd .context/architecture-context
-    git sparse-checkout set "architecture/$LATEST"
-    cd -
-  fi
-fi
+bash scripts/fetch-architecture-context.sh
 ```
 
 ## Step 3: Run Reviews
