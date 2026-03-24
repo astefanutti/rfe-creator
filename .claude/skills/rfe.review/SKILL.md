@@ -155,7 +155,7 @@ This file must NOT be merged back into the RFE description.
 3. For each criterion the assessor flagged, follow its specific recommendations:
    - **Open to HOW**: Reframe flagged sections to remove prescriptive framing while preserving useful context. If content cannot be reframed, remove it and write it to `artifacts/rfe-tasks/RFE-NNN-removed-context.md` for preservation as a Jira comment during `/rfe.submit`
    - **WHY**: Strengthen with available evidence (stakeholder comments, strategic alignment references); flag gaps the author must fill (named customers, revenue data)
-   - **Right-sized**: Report the recommendation only; do not split or remove scope
+   - **Right-sized**: Report the recommendation only; do not split or remove scope. Advise the user to run `/rfe.split` if splitting is needed
    - **WHAT / Not a task**: Follow assessor guidance if provided
 4. Add a `### Revision Notes` section at the end of each revised RFE documenting what changed and what gaps remain for the user to fill
 5. Re-run the review (go back to Step 2) on the revised artifacts
