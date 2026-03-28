@@ -25,7 +25,31 @@ Check if `JIRA_SERVER`, `JIRA_USER`, and `JIRA_TOKEN` environment variables are 
 >
 > After environment variables are set, re-run `/rfe.submit`.
 
-## Step 1: Detect Mode and Run
+## Step 1: Conflict Detection
+
+Before submitting, check for concurrent modifications to any Jira-sourced RFEs (those with `rfe_id` starting with `RHAIRFE-`).
+
+For each Jira-sourced RFE being submitted, check if an original snapshot exists at `artifacts/rfe-originals/<rfe_id>.md`. If it does:
+
+1. Re-fetch the current Jira description using the REST API script:
+
+```bash
+python3 scripts/fetch_issue.py <rfe_id> --fields summary,description --markdown
+```
+
+2. Compare the fetched description against the original snapshot's description (ignoring frontmatter). If they differ, someone modified the RFE in Jira since we last fetched it.
+
+3. **If a conflict is detected**: Stop submission for that RFE. Report the conflict:
+
+> **Conflict detected for `<rfe_id>`**: The RFE was modified in Jira since it was last fetched. Submitting would overwrite those changes.
+>
+> To resolve: re-fetch from Jira by running `/rfe.review <rfe_id>`, then re-apply your changes.
+
+4. **If no conflict**: Proceed with submission.
+
+If no original snapshot exists (e.g., for locally-created RFEs with `RFE-NNN` IDs), skip conflict detection — there is no Jira state to conflict with.
+
+## Step 2: Detect Mode and Run
 
 Check task file frontmatter to determine whether this is a split submission or standard submission.
 
@@ -62,7 +86,7 @@ The standard submit script handles:
 - Renaming local files from RFE-NNN to RHAIRFE-NNNN after submission
 - Rebuilding the rfes.md index
 
-## Step 2: Report Results
+## Step 3: Report Results
 
 After the script completes, read `artifacts/rfes.md` (rebuilt by the script) and report the results.
 

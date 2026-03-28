@@ -12,7 +12,9 @@ You are an RFE splitting assistant. Your job is to decompose an oversized RFE in
 
 Check if `$ARGUMENTS` contains a Jira key (e.g., `RHAIRFE-1234`) or a local artifact reference (e.g., `RFE-001`).
 
-**If a Jira key**: Fetch the RFE from Jira. Try `mcp__atlassian__getJiraIssue` first. If the MCP tool is unavailable, fall back to the REST API script:
+**If a Jira key**: First check if `artifacts/rfe-tasks/<jira_key>.md` already exists locally. If it does, use the local copy — do not re-fetch from Jira. This preserves any local edits from prior review or split cycles.
+
+**If the local file does not exist**, fetch the RFE from Jira. Try `mcp__atlassian__getJiraIssue` first. If the MCP tool is unavailable, fall back to the REST API script:
 
 ```bash
 python3 scripts/fetch_issue.py RHAIRFE-1234 --fields summary,description,priority,labels,status --markdown
@@ -38,6 +40,8 @@ python3 scripts/frontmatter.py set artifacts/rfe-tasks/<jira_key>.md \
     size=<size> \
     status=Ready
 ```
+
+**Save an original snapshot** by copying the file (after frontmatter is set) to `artifacts/rfe-originals/<jira_key>.md`. This snapshot captures the RFE as it existed in Jira before any local splitting or revision. It serves two purposes: (1) before/after data analysis of what remediation changed, and (2) optimistic conflict detection at submit time. Create the `artifacts/rfe-originals/` directory if it doesn't exist. This file is never modified by split or revision — it is only overwritten by a fresh Jira fetch.
 
 **If a local artifact reference**: Find and read the matching file in `artifacts/rfe-tasks/`.
 

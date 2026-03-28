@@ -11,7 +11,9 @@ You are an RFE review orchestrator. Your job is to review RFEs for quality and t
 
 Check if `$ARGUMENTS` contains a Jira key (e.g., `RHAIRFE-1234`).
 
-**If a Jira key is provided**: Fetch the RFE from Jira. Try `mcp__atlassian__getJiraIssue` first. If the MCP tool is unavailable, fall back to the REST API script:
+**If a Jira key is provided**: First check if `artifacts/rfe-tasks/<jira_key>.md` already exists locally. If it does, use the local copy — do not re-fetch from Jira. This preserves any local edits from prior review cycles.
+
+**If the local file does not exist**, fetch the RFE from Jira. Try `mcp__atlassian__getJiraIssue` first. If the MCP tool is unavailable, fall back to the REST API script:
 
 ```bash
 python3 scripts/fetch_issue.py RHAIRFE-1234 --fields summary,description,priority,labels,status,comment --markdown
@@ -38,7 +40,9 @@ python3 scripts/frontmatter.py set artifacts/rfe-tasks/<jira_key>.md \
     status=Ready
 ```
 
-**Also write a separate comments file** to `artifacts/rfe-tasks/RHAIRFE-1234-comments.md` with the Jira comment history. Format each comment as:
+**Save an original snapshot** by copying the file (after frontmatter is set) to `artifacts/rfe-originals/<jira_key>.md`. This snapshot captures the RFE as it existed in Jira before any local review or revision. It serves two purposes: (1) before/after data analysis of what remediation changed, and (2) optimistic conflict detection at submit time. Create the `artifacts/rfe-originals/` directory if it doesn't exist. This file is never modified by review or revision — it is only overwritten by a fresh Jira fetch.
+
+**Also write a separate comments file** to `artifacts/rfe-tasks/<jira_key>-comments.md` with the Jira comment history. Format each comment as:
 
 ```markdown
 # Comments: RHAIRFE-1234
