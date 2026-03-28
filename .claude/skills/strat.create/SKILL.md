@@ -11,8 +11,13 @@ You are a strategy creation assistant. Your job is to create strategies from app
 
 Check for available RFE sources:
 
-1. **Local artifacts** — check for `artifacts/rfe-tasks/` and `artifacts/rfes.md`
-2. **Jira** — check if Jira MCP is available or if `JIRA_SERVER`/`JIRA_USER`/`JIRA_TOKEN` env vars are set, and if the user has provided RHAIRFE keys or `artifacts/jira-tickets.md` exists
+1. **Local artifacts** — check for `artifacts/rfe-tasks/` files with valid frontmatter. Read Jira keys from task file frontmatter:
+
+```bash
+python3 scripts/frontmatter.py read artifacts/rfe-tasks/<file>.md
+```
+
+2. **Jira** — check if Jira MCP is available or if `JIRA_SERVER`/`JIRA_USER`/`JIRA_TOKEN` env vars are set, and if the user has provided RHAIRFE keys
 
 **If both local artifacts and Jira are available**: Ask the user which source to use. Local artifacts may have been edited after submission; Jira has the canonical version. Let the user decide.
 

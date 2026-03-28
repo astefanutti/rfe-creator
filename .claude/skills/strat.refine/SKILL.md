@@ -14,16 +14,16 @@ Read the strategy files in `artifacts/strat-tasks/`. Each contains the business 
 
 ## Revision Mode
 
-Check if `artifacts/strat-review-report.md` exists. If it does, this is a revision — the strategies have already been refined and reviewed. Read the review report carefully.
+Check if prior reviews exist in `artifacts/strat-reviews/` for any of the strategies being refined. If they do, this is a revision — the strategies have already been refined and reviewed. Read each strategy's review file.
 
 In revision mode:
 - **Do not regenerate from scratch.** Read the existing strategy content and the review feedback.
-- **Address each reviewer's concerns specifically.** The report contains findings from up to 4 independent reviewers (feasibility, testability, scope, architecture). Address each concern that has merit.
+- **Address each reviewer's concerns specifically.** The review file contains findings from up to 4 independent reviewers (feasibility, testability, scope, architecture). Address each concern that has merit.
 - **Preserve what's working.** If reviewers approved aspects of the strategy, don't rewrite those sections.
 - **Note what changed.** Add a `### Revision Notes` section at the end of each revised strategy listing what was changed and why, referencing the specific review concerns addressed.
 - **Flag disagreements.** If you believe a reviewer's concern is invalid, keep the current approach and explain why in the revision notes rather than silently ignoring it.
 
-If no review report exists, this is initial refinement — generate the strategy from the stub.
+If no review files exist, this is initial refinement — generate the strategy from the stub.
 
 ## Architecture Context
 

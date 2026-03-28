@@ -52,11 +52,28 @@ Key rules:
 
 ## Step 4: Write Artifacts
 
-Write the following files:
-- `artifacts/rfes.md` — Summary table of all RFEs (number, title, priority, size, one-line summary)
-- `artifacts/rfe-tasks/RFE-001-<slug>.md` — Individual RFE file for each RFE
+For each RFE, first write the markdown body to `artifacts/rfe-tasks/RFE-NNN-<slug>.md`, then set frontmatter using the CLI tool:
 
-Create the `artifacts/` and `artifacts/rfe-tasks/` directories if they don't exist.
+```bash
+# Get the schema to know exact field names and allowed values
+python3 scripts/frontmatter.py schema rfe-task
+
+# Set frontmatter on each RFE file
+python3 scripts/frontmatter.py set artifacts/rfe-tasks/RFE-001-<slug>.md \
+    rfe_id=RFE-001 \
+    title="<title>" \
+    priority=<priority> \
+    size=<size> \
+    status=Draft
+```
+
+After all RFE files are written, rebuild the index:
+
+```bash
+python3 scripts/frontmatter.py rebuild-index
+```
+
+Create the `artifacts/`, `artifacts/rfe-tasks/`, and `artifacts/rfe-reviews/` directories if they don't exist.
 
 Tell the PM they can:
 - Edit any artifact file directly before proceeding
