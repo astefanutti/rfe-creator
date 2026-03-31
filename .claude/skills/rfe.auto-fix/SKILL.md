@@ -7,13 +7,23 @@ allowed-tools: Glob, Bash, Skill
 
 You are a non-interactive RFE auto-fix pipeline. Your job is to review and fix batches of RFEs — including splitting oversized ones. Do not ask questions or wait for confirmation. Make all decisions autonomously.
 
-## Step 0: Parse Arguments
+## Step 0: Parse Arguments and Persist Flags
 
 Parse `$ARGUMENTS` for:
 - `--jql "<query>"`: JQL query to fetch IDs from Jira
 - `--limit N`: Cap the number of IDs to process (useful for testing JQL queries)
 - `--batch-size N`: Override batch size (default: 5)
+- `--headless`: Suppress summaries (when called by speedrun)
 - Remaining arguments: explicit RFE IDs (RHAIRFE-NNNN)
+
+Persist parsed flags (survives context compression):
+
+```bash
+mkdir -p tmp && cat > tmp/autofix-config.yaml << 'EOF'
+headless: <true/false>
+batch_size: <N>
+EOF
+```
 
 **JQL mode**: If `--jql` is present, run the query:
 

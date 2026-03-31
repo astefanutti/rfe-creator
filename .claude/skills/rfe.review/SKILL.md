@@ -7,11 +7,19 @@ allowed-tools: Glob, Bash, Agent, AskUserQuestion
 
 You are an RFE review orchestrator. Your job is to coordinate reviews and revisions by launching agents and reading structured results. **Critical: never read file contents into your context — only read frontmatter via `scripts/frontmatter.py read` and check file existence via Glob.** All content-heavy work (reading RFE bodies, assessment results, writing review files, doing revisions) is delegated to agents.
 
-## Step 0: Parse Arguments
+## Step 0: Parse Arguments and Persist Flags
 
 Parse `$ARGUMENTS` for flags and IDs:
 - Strip `--headless` flag if present (suppresses end-of-run summary)
 - Remaining arguments are one or more space-separated RFE IDs (RHAIRFE-NNNN or RFE-NNN)
+
+Persist parsed flags (survives context compression):
+
+```bash
+mkdir -p tmp && cat > tmp/review-config.yaml << 'EOF'
+headless: <true/false>
+EOF
+```
 
 For each ID, check if `artifacts/rfe-tasks/<id>.md` already exists locally (use Glob, don't read the file). Separate IDs into:
 - **Local**: task file exists — skip fetch
@@ -28,8 +36,8 @@ Read .claude/skills/rfe.review/prompts/fetch-agent.md and follow all instruction
 Write IDs to poll file once, then poll using `NEXT_POLL` interval:
 
 ```bash
-echo "<all_remote_IDs>" > /tmp/rfe-poll-fetch.txt
-python3 scripts/check_review_progress.py --phase fetch --id-file /tmp/rfe-poll-fetch.txt
+echo "<all_remote_IDs>" > tmp/rfe-poll-fetch.txt
+python3 scripts/check_review_progress.py --phase fetch --id-file tmp/rfe-poll-fetch.txt
 ```
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Only output a status line when COMPLETED count changes. If any agent runs longer than 5 minutes, check its status.
@@ -87,10 +95,10 @@ Launch all agents for all IDs in parallel (2N agents total for N IDs).
 Write IDs to poll files once, then poll every 60 seconds:
 
 ```bash
-echo "<all_IDs>" > /tmp/rfe-poll-assess.txt
-echo "<all_IDs>" > /tmp/rfe-poll-feasibility.txt
-python3 scripts/check_review_progress.py --phase assess --id-file /tmp/rfe-poll-assess.txt
-python3 scripts/check_review_progress.py --phase feasibility --id-file /tmp/rfe-poll-feasibility.txt
+echo "<all_IDs>" > tmp/rfe-poll-assess.txt
+echo "<all_IDs>" > tmp/rfe-poll-feasibility.txt
+python3 scripts/check_review_progress.py --phase assess --id-file tmp/rfe-poll-assess.txt
+python3 scripts/check_review_progress.py --phase feasibility --id-file tmp/rfe-poll-feasibility.txt
 ```
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Only output status when COMPLETED count changes. Wait for all to complete.
@@ -113,8 +121,8 @@ Launch all review agents in parallel.
 Write IDs to poll file once, then poll using `NEXT_POLL` interval:
 
 ```bash
-echo "<all_IDs>" > /tmp/rfe-poll-review.txt
-python3 scripts/check_review_progress.py --phase review --id-file /tmp/rfe-poll-review.txt
+echo "<all_IDs>" > tmp/rfe-poll-review.txt
+python3 scripts/check_review_progress.py --phase review --id-file tmp/rfe-poll-review.txt
 ```
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Wait for all to complete. For any ID where the review file is missing or has no frontmatter, write error: `review_failed`.
@@ -138,8 +146,8 @@ Launch all revise agents in parallel.
 Write IDs to poll file once, then poll using `NEXT_POLL` interval:
 
 ```bash
-echo "<all_IDs_being_revised>" > /tmp/rfe-poll-revise.txt
-python3 scripts/check_review_progress.py --phase revise --id-file /tmp/rfe-poll-revise.txt
+echo "<all_IDs_being_revised>" > tmp/rfe-poll-revise.txt
+python3 scripts/check_review_progress.py --phase revise --id-file tmp/rfe-poll-revise.txt
 ```
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Wait for all to complete.
@@ -196,7 +204,13 @@ Rebuild the index once:
 python3 scripts/frontmatter.py rebuild-index
 ```
 
-**If `--headless` was set**: Stop here. Do not output any summary. The calling orchestrator handles reporting. **Resume the calling skill's next step immediately.**
+Re-read flags (in case context was compressed):
+
+```bash
+cat tmp/review-config.yaml
+```
+
+**If `headless: true`**: Stop here. Do not output any summary. The calling orchestrator handles reporting. **Resume the calling skill's next step immediately.**
 
 **If interactive (no `--headless`)**: Read results and present summary:
 
