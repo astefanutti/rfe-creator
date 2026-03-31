@@ -7,11 +7,19 @@ allowed-tools: Glob, Bash, Agent, Skill, AskUserQuestion
 
 You are an RFE splitting orchestrator. Your job is to coordinate RFE decomposition by launching agents and reading structured results. **Critical: never read file contents into your context — only read frontmatter via `scripts/frontmatter.py read` and check file existence via Glob.** All content-heavy work (reading RFE bodies, decomposition analysis, generating children) is delegated to agents.
 
-## Step 0: Parse Arguments
+## Step 0: Parse Arguments and Persist Flags
 
 Parse `$ARGUMENTS` for flags and IDs:
 - Strip `--headless` flag if present (suppresses end-of-run summary)
 - Remaining arguments are one or more space-separated RFE IDs (RHAIRFE-NNNN or RFE-NNN)
+
+Persist parsed flags (survives context compression):
+
+```bash
+mkdir -p tmp && cat > tmp/split-config.yaml << 'EOF'
+headless: <true/false>
+EOF
+```
 
 If no arguments provided, stop with: "Usage: `/rfe.split <ID> [ID2 ...]`. Provide one or more RFE IDs."
 
@@ -30,8 +38,8 @@ Launch all split agents in parallel.
 Write IDs to poll file once, then poll using `NEXT_POLL` interval:
 
 ```bash
-echo "<all_IDs>" > /tmp/rfe-poll-split.txt
-python3 scripts/check_review_progress.py --phase split --id-file /tmp/rfe-poll-split.txt
+echo "<all_IDs>" > tmp/rfe-poll-split.txt
+python3 scripts/check_review_progress.py --phase split --id-file tmp/rfe-poll-split.txt
 ```
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Only output status when COMPLETED count changes. If any agent runs longer than 5 minutes, check its status.
@@ -94,7 +102,13 @@ Rebuild the index once:
 python3 scripts/frontmatter.py rebuild-index
 ```
 
-**If `--headless` was set**: Stop here. Do not output any summary. **Resume the calling skill's next step immediately.**
+Re-read flags (in case context was compressed):
+
+```bash
+cat tmp/split-config.yaml
+```
+
+**If `headless: true`**: Stop here. Do not output any summary. **Resume the calling skill's next step immediately.**
 
 **If interactive (no `--headless`)**: Present the final state for each parent ID:
 
