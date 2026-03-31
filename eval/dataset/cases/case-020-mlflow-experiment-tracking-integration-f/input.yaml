@@ -1,0 +1,87 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1473
+title: MLflow Experiment Tracking Integration for Training Hub
+priority: Major
+size: XL
+status: Ready
+source_jira_status: Approved
+source_labels:
+- 3.4-candidate
+- needs-review
+rfe_content: "## Problem Statement\n\n**Training Hub users need a way to track, compare, and manage machine learning experiments\
+  \ across different training runs and algorithms. Without experiment tracking, users face several challenges:**\n\n- No central\
+  \ record of training runs: Users manually track hyperparameters, metrics, and results in spreadsheets or notebooks, leading\
+  \ to errors and inconsistencies\n- Difficult to compare experiments: Without standardized logging, comparing the performance\
+  \ of different model configurations requires manual data aggregation\n- Lost context: When revisiting experiments weeks\
+  \ later, users struggle to remember what configurations were tested and why\n- Team collaboration friction: Sharing experimental\
+  \ results with teammates requires sending files or screenshots rather than links to live dashboards\n- Reproducibility challenges:\
+  \ Without automatic logging of all training parameters, reproducing successful experiments is error-prone\n\n## Business\
+  \ Alignment\n\n**Business Value:**\n\n- Accelerated experimentation velocity: Automated tracking eliminates manual bookkeeping\
+  \ overhead\n- Improved model quality: Easy comparison across runs enables data-driven hyperparameter selection\n- Enterprise\
+  \ readiness: MLflow is a widely adopted open-source standard (10M+ downloads/month)\n- Reduced time-to-production: Complete\
+  \ experiment records enable faster model deployment\n\n**Expected Impact:**\n\n- 100% of Training Hub user base benefits\
+  \ (all SFT, OSFT, and LoRA users)\n- Cost savings: ~2-4 hours per data scientist per week\n- Enterprise adoption: Compatible\
+  \ with existing MLflow infrastructure (7000+ Databricks customers)\n\n## Proposed Solution\n\nAdd automatic MLflow integration\
+  \ to all Training Hub training algorithms (SFT, OSFT, LoRA) through a simple, zero-configuration API. When users provide\
+  \ an mlflow_tracking_uri parameter, Training Hub automatically logs all training metrics, hyperparameters, and run metadata\
+  \ to the specified MLflow server.\n\nExample usage:\n\n```python\nfrom training_hub import sft\n\nsft(\n    model_path=\"\
+  Qwen/Qwen2.5-7B-Instruct\",\n    data_path=\"./data.jsonl\",\n    ckpt_output_dir=\"./checkpoints\",\n    num_epochs=3,\n\
+  \    learning_rate=2e-5,\n    # MLflow config - zero boilerplate!\n    mlflow_tracking_uri=\"http://localhost:5000\",\n\
+  \    mlflow_experiment_name=\"qwen-sft-experiments\",\n)\n```\n\n## Acceptance Criteria\n\n- API Parameters: Add mlflow_tracking_uri,\
+  \ mlflow_experiment_name, mlflow_run_name parameters to sft(), osft(), and lora_sft() functions\n- Environment Variable\
+  \ Support: Support MLFLOW_TRACKING_URI, MLFLOW_EXPERIMENT_NAME, MLFLOW_RUN_NAME environment variables\n- Auto-Detection:\
+  \ MLflow logging automatically enabled when tracking URI is provided\n- Algorithm Coverage: Works with all three algorithms\
+  \ (SFT, OSFT, LoRA)\n- Distributed Training: Rank 0 only logging in multi-GPU/multi-node scenarios\n- Multi-Logger Compatible:\
+  \ Works alongside W&B, TensorBoard, and JSONL logging\n- Documentation: Complete guide in docs/guides/logging.md\n- Backward\
+  \ Compatible: Optional feature that doesn't break existing code\n\n## \n\n## Reference Links\n\n- MLflow documentation:\
+  \ https://mlflow.org/docs/latest/\n- HuggingFace MLflow integration: [https://huggingface.co/docs/transformers/main_classes/callback](https://huggingface.co/docs/transformers/main_classes/callback)"
+comments: '# Comments: RHAIRFE-1473
+
+
+  ## Mustafa Eyceoz — 2026-03-19
+
+  - **Assessment:** Accepted
+
+  - **Primary component:** AI Innovation Training Team
+
+  - **Impacted components:** RHAI PM Team - Awareness of integration for planning in OpenShift AI components, RHOAI Fine-Tuning
+  / KFP Teams - similar awareness as an available integration point
+
+  - **High level architecture plan:** As detailed above, providing uniform api and env var support for configuring and auto-enabling
+  experiment tracking in mlflow alongside training runs, across all algorithms
+
+  - **Other related work:** Other MLFlow efforts for native support across RHAI
+
+  '
+prompt: We need to add MLflow experiment tracking support to Training Hub. Our users are currently manually tracking their
+  training runs in spreadsheets and notebooks, which is error-prone and makes it really hard to compare experiments or collaborate
+  with teammates. MLflow is the industry standard for experiment tracking and many of our enterprise customers already have
+  MLflow infrastructure in place. We should make it dead simple — just pass a tracking URI and everything gets logged automatically
+  across SFT, OSFT, and LoRA workflows.
+clarifying_context: 'Customers: Databricks enterprise customers (7000+ existing MLflow users), Training Hub power users running
+  SFT/OSFT/LoRA fine-tuning workflows, enterprise ML teams at companies like Acme AI Labs, FinServ Analytics, and MedTech
+  ML division who need standardized experiment tracking
+
+  Business justification: 100% of Training Hub user base benefits from this capability. Estimated cost savings of 2-4 hours
+  per data scientist per week by eliminating manual experiment bookkeeping. MLflow is a widely adopted open-source standard
+  with 10M+ downloads/month, making this critical for enterprise readiness and adoption. Compatibility with existing MLflow
+  infrastructure across 7000+ Databricks customers accelerates enterprise adoption.
+
+  User problem: Users have no central record of training runs and manually track hyperparameters, metrics, and results in
+  spreadsheets leading to errors. Comparing experiments requires manual data aggregation. When revisiting experiments weeks
+  later, users can''t remember what was tested and why. Sharing results with teammates requires sending files or screenshots
+  instead of linking to live dashboards. Reproducing successful experiments is error-prone without automatic logging of all
+  training parameters.
+
+  Scope: Single focused need — adding MLflow integration as an experiment tracking backend across all three Training Hub algorithms
+  (SFT, OSFT, LoRA). Requires new API parameters (mlflow_tracking_uri, mlflow_experiment_name, mlflow_run_name), environment
+  variable support, auto-detection when tracking URI is provided, rank-0-only logging for distributed training, compatibility
+  with existing loggers (W&B, TensorBoard, JSONL), and documentation updates. Should be zero-configuration from the user''s
+  perspective.
+
+  Success criteria: Users can pass an mlflow_tracking_uri parameter to sft(), osft(), or lora_sft() and have all training
+  metrics, hyperparameters, and run metadata automatically logged to their MLflow server with zero additional boilerplate.
+  Feature works in multi-GPU/multi-node distributed scenarios with rank-0-only logging. Feature is backward compatible and
+  does not break existing code when MLflow parameters are not provided. Feature works alongside existing logging integrations.
+  Complete documentation guide available in docs/guides/logging.md.'

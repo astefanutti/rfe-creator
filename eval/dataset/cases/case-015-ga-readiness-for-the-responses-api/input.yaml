@@ -1,0 +1,192 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1506
+title: GA readiness for the Responses API
+priority: Critical
+size: XL
+status: Ready
+source_jira_status: Pending Approval
+source_labels:
+- 3.5-candidate
+- confidence-yellow
+- needs-tech-review
+- responses-api
+rfe_content: '## Problem Statement
+
+
+  Customers adopting Red Hat AI as their OpenAI-compatible inference platform expect the Responses API to support the same
+  fields, parameters, and behaviors as the OpenAI Responses API. The current Tech Preview implementation ([https://redhat.atlassian.net/browse/RHAISTRAT-1054#icft=RHAISTRAT-1054](https://redhat.atlassian.net/browse/RHAISTRAT-1054#icft=RHAISTRAT-1054),
+  3.4) intentionally defers full API coverage to ship faster. However, customers cannot migrate production workloads from
+  OpenAI to Red Hat AI until they can confirm that every API call their application makes will work identically or fail with
+  a clear, documented explanation. Silent field drops, missing parameters, and undocumented behavioral differences are the
+  primary blockers to production adoption.
+
+
+  Without full API parity, customers must maintain dual codepaths (one for OpenAI, one for Red Hat AI) or accept unexpected
+  failures when they switch providers. This directly undermines the value proposition of Red Hat AI as an OpenAI-compatible
+  platform.
+
+
+  ## Affected Customers
+
+
+  - **Italian Public Sector (7 accounts)**: ANAC, AGEA, INPS, Poste Italiane, FIT, ENEL, SNAM – all require "Private OpenAI"
+  capability; OpenAI Responses API compatibility is the core value proposition for this market
+
+  - **BofA**: Requires OpenAI-compatible endpoints for Model-as-a-Service (MaaS) deployment across the organization
+
+  - **Infineon**: Needs to "interface via OpenAI API standard to easily switch models" – API parity is their provider portability
+  strategy
+
+  - **Citi**: Extending their Backstage plugin via OpenAI chat/completions endpoints; incomplete parity blocks their integration
+
+  - **Turkcell**: Building an open, pluggable RAG/agent stack with OpenAI-compatible APIs as the interface layer
+
+  - **Isbank**: Using OpenAI-compatible APIs as their standard interface; parity gaps force custom workarounds
+
+  - **SVA**: Hitting technical limitations with Watsonx around OpenAI-style APIs and wants to move to RHOAI specifically for
+  better compatibility
+
+  - 20+ customers validated in discovery across financial services, public sector, telecom, and manufacturing
+
+
+  ## Business Justification
+
+
+  The Responses API is the primary interface through which developers interact with agentic capabilities (tool use, multi-turn
+  reasoning, structured outputs). Customer discovery validates OpenAI compatibility as the top adoption driver: 7 Italian
+  public sector accounts (ANAC, AGEA, INPS, Poste Italiane, FIT, ENEL, SNAM) position Red Hat AI as "Private OpenAI" – API
+  parity is the entire value proposition. BofA requires OpenAI-compatible endpoints for MaaS. Infineon explicitly wants to
+  "interface via OpenAI API standard to easily switch models." Citi''s Backstage integration depends on chat/completions endpoint
+  parity. SVA is migrating from Watsonx specifically because of OpenAI-style API limitations. With 20+ validated customers,
+  incomplete API parity directly blocks the largest revenue opportunity in the pipeline. Closing the parity gap is the single
+  highest-leverage action to convert TP users into GA production customers.
+
+
+  ## Acceptance Criteria
+
+
+  - **[MUST]** All OpenAI Responses API fields and parameters are supported, or explicitly excluded with documented justification
+  and workarounds – no silent field drops
+
+  - **[MUST]** Full SSE streaming support for long-running generations, matching OpenAI streaming event format
+
+  - **[MUST]** Conversations API integration works seamlessly with the Responses API for multi-turn state management
+
+  - **[MUST]** Compatibility matrix published documenting per-field, per-parameter coverage compared to OpenAI Responses API
+
+  - **[SHOULD]** Performance benchmarks published for representative workloads (latency p50/p95/p99, throughput, resource
+  consumption) with sizing guidance
+
+
+  ## Success Criteria
+
+
+  - A customer application written against the OpenAI Responses API (Python SDK) works against Red Hat AI''s Responses API
+  with zero code changes, or all differences are documented in the compatibility matrix
+
+  - No silent field drops – every unsupported field returns a clear error or is documented as unsupported
+
+  - Streaming behavior matches OpenAI SSE event format for all supported response types
+
+
+  ## Recommended Split-offs
+
+
+  ### Split 1: Production-Grade Response Storage and Persistence
+
+
+  Durable storage for response objects with defined retention and scale guarantees.
+
+
+  - Response persistence with configurable retention policies (TTL, max count)
+
+  - Validated behavior at scale: 10K+ stored responses, concurrent access, backup/restore guidance
+
+  - Per-user isolation for stored responses validated and documented
+
+
+  ### Split 2: Multi-Provider Validation Matrix
+
+
+  Systematic testing of the full API surface across all supported inference providers.
+
+
+  - Every supported provider (vLLM, remote::openai, remote::anthropic) tested against the full Responses API surface
+
+  - Per-provider compatibility matrix published with per-field coverage and known limitations
+
+  - Automated test suite running in CI for each provider on every release
+
+
+  ### Split 3: Responses API Observability Integration
+
+
+  GenAI-specific telemetry for Responses API calls.
+
+
+  - Responses API calls traced with GenAI semantic conventions (gen_ai.usage.input_tokens, gen_ai.response.model, etc.)
+
+  - Integration with MLflow and OTEL for end-to-end trace visibility
+
+  - Dashboard templates for monitoring Responses API usage, latency, and error rates
+
+
+  ### Split 4: TP-to-GA Upgrade and Migration Path
+
+
+  Documented migration from Tech Preview to GA for existing users.
+
+
+  - Documented migration steps for any schema changes, breaking changes, or data migration between TP and GA
+
+  - Automated migration tooling for stored responses if schema changes
+
+  - QE validation of upgrade path from TP to GA without data loss'
+comments: "# Comments: RHAIRFE-1506\n\n## Adel Zaalouk — 2026-03-23\n[INFO] PM Delivery Confidence: RED\n\nAutomated confidence\
+  \ assessment based on activity signals. Label `confidence-red` applied.\n\nConfidence reasoning: Red signals: no assignee,\
+  \ no comments\n\nThis is an automated PM confidence label — not an engineering status.\n\n## Adel Zaalouk — 2026-03-27\n\
+  **[RFE Creator]** Description revised: reframed as customer-facing business need, added customer discovery evidence (source:\
+  \ AI Customers & Prospects Discovery doc).\n\n## Automation for Jira — 2026-03-30\nThe RFE is in status \"PENDING APPROVAL\"\
+  . \n\nThe next step is for the Product Manager to change the status to  \"APPROVED\" and to manually clone the RFE to create\
+  \ a Feature in the RHAISTRAT Jira project.\n\n## Bill Murdock — 2026-03-30\nAssessment: Accepted\n\nRequires architecture\
+  \ review: No\n\nPrimary component: Llama Stack Core\n\nImpacted components: AgentDev\n\nHigh level architecture plan: Continue\
+  \ testing and hardening the APIs — no additional functionality is needed for GA readiness. Collaborate with the performance\
+  \ and scale team to provide customer guidance on scaling the capability for various load levels.\n\nOther related work:\
+  \ RHAIRFE-971, RHAISTRAT-1232, RHAISTRAT-1111\n"
+prompt: We need to get the Responses API ready for GA. Right now it's in Tech Preview and we intentionally shipped with incomplete
+  OpenAI API coverage to move fast, but customers can't migrate production workloads because of silent field drops, missing
+  parameters, and undocumented behavioral differences. We have 20+ customers across financial services, public sector, and
+  telecom who are blocked on this — the whole value proposition of Red Hat AI as an OpenAI-compatible platform falls apart
+  without full API parity. We need to close the gap so TP users can convert to GA production customers.
+clarifying_context: 'Customers: Italian Public Sector (7 accounts: ANAC, AGEA, INPS, Poste Italiane, FIT, ENEL, SNAM), Bank
+  of America (MaaS deployment), Infineon (provider portability), Citi (Backstage plugin integration), Turkcell (pluggable
+  RAG/agent stack), Isbank (OpenAI-compatible standard interface), SVA (migrating from Watsonx for better OpenAI compatibility),
+  20+ validated customers across financial services, public sector, telecom, and manufacturing
+
+  Business justification: OpenAI compatibility is the top adoption driver validated across customer discovery. 7 Italian public
+  sector accounts position Red Hat AI as ''Private OpenAI'' — API parity is the entire value proposition. BofA requires OpenAI-compatible
+  endpoints for Model-as-a-Service. Infineon explicitly wants to ''interface via OpenAI API standard to easily switch models.''
+  Citi''s Backstage integration depends on endpoint parity. SVA is migrating from Watsonx specifically because of OpenAI-style
+  API limitations. Incomplete API parity directly blocks the largest revenue opportunity in the pipeline. This is the single
+  highest-leverage action to convert TP users into GA production customers.
+
+  User problem: Customers cannot migrate production workloads from OpenAI to Red Hat AI because the current Tech Preview implementation
+  silently drops fields, is missing parameters, and has undocumented behavioral differences. This forces customers to maintain
+  dual codepaths (one for OpenAI, one for Red Hat AI) or accept unexpected failures when switching providers. The Responses
+  API is the primary interface for agentic capabilities (tool use, multi-turn reasoning, structured outputs), so gaps here
+  block the core use cases.
+
+  Scope: This is a large effort with multiple sub-workstreams. The core need is full OpenAI Responses API field/parameter
+  parity with SSE streaming and Conversations API integration. Recommended split-offs include: (1) Production-grade response
+  storage and persistence with retention policies and scale validation, (2) Multi-provider validation matrix across vLLM,
+  remote::openai, remote::anthropic with automated CI testing, (3) Responses API observability integration with GenAI semantic
+  conventions, MLflow/OTEL tracing, and dashboard templates, (4) TP-to-GA upgrade and migration path with documented migration
+  steps, automated tooling, and QE validation.
+
+  Success criteria: A customer application written against the OpenAI Responses API (Python SDK) works against Red Hat AI''s
+  Responses API with zero code changes, or all differences are documented in a published compatibility matrix. No silent field
+  drops — every unsupported field returns a clear error or is documented as unsupported. Streaming behavior matches OpenAI
+  SSE event format for all supported response types. Compatibility matrix published documenting per-field, per-parameter coverage
+  compared to OpenAI Responses API. Performance benchmarks published for representative workloads (latency p50/p95/p99, throughput,
+  resource consumption) with sizing guidance.'

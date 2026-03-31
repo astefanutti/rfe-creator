@@ -1,0 +1,74 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1571
+title: Command-Line Interface (CLI) for Ray Cluster Management
+priority: Undefined
+size: M
+status: Ready
+source_jira_status: New
+source_labels: []
+rfe_content: '## Problem Statement
+
+
+  The SDK currently provides only a Python programmatic API, requiring users to write Python scripts or use Jupyter notebooks
+  for all operations. Simple tasks like list clusters require writing and running Python scripts. No support for CI/CD integration,
+  shell scripting, or kubectl-style workflow.
+
+
+  ## Business Alignment
+
+
+  Expected impact: 10x increase in non-data-scientist users (SREs, platform engineers), 90% reduction in pipeline complexity
+  for cluster management, 5x faster for quick status checks.
+
+
+  Market opportunity: Every major ML/data platform provides CLI (AWS CLI, gcloud, az ml). Kubernetes ecosystem expects CLI
+  tools. Enterprise DevOps standardizes on CLI for automation.
+
+
+  ## Proposed Solution
+
+
+  Implement comprehensive CLI using click framework with kubectl-style UX. Command groups: cluster (list, get, create, delete,
+  scale, status, dashboard), job (submit, create, list, get, logs, stop, wait), capabilities, config. Output formats: table,
+  JSON, YAML.
+
+
+  ## Acceptance Criteria
+
+
+  - codeflare cluster command group (list, get, create, delete, scale, status, dashboard, metrics)
+
+  - codeflare job command group (submit, create, list, get, logs, stop, wait, delete)
+
+  - Output formats: table, JSON, YAML
+
+  - Preset support in cluster create command
+
+  - Shell completion support (bash, zsh, fish)'
+prompt: We need a CLI for managing Ray clusters through our SDK. Right now everything requires writing Python scripts, which
+  is a huge barrier for SREs and platform engineers who just want to do quick operations like listing clusters or checking
+  status. We're losing out to competitors who all offer kubectl-style CLI tools, and our users can't easily integrate cluster
+  management into their CI/CD pipelines or shell scripts.
+clarifying_context: 'Customers: Enterprise platform engineering teams at companies like Fidelity Investments, Bloomberg, and
+  Capital One; SRE teams managing ML infrastructure; DevOps engineers building CI/CD pipelines for ML workloads
+
+  Business justification: Expected 10x increase in non-data-scientist users (SREs, platform engineers) by removing the Python-only
+  barrier. 90% reduction in pipeline complexity for cluster management automation. Every major competitor (AWS CLI, gcloud,
+  az ml) provides CLI tooling — this is table stakes for enterprise adoption. Kubernetes ecosystem users expect CLI tools
+  and will not adopt a Python-only SDK.
+
+  User problem: Users must write and execute Python scripts or use Jupyter notebooks for even the simplest operations like
+  listing clusters or checking status. There is no way to integrate cluster management into CI/CD pipelines, shell scripts,
+  or standard DevOps workflows. Platform engineers and SREs who are not Python-focused are effectively locked out of managing
+  Ray clusters through the SDK.
+
+  Scope: Single focused feature — a comprehensive CLI built with the click framework, organized into command groups: cluster
+  (list, get, create, delete, scale, status, dashboard, metrics) and job (submit, create, list, get, logs, stop, wait, delete),
+  plus capabilities and config commands. Includes multiple output formats (table, JSON, YAML), preset support for cluster
+  creation, and shell completion for bash, zsh, and fish.
+
+  Success criteria: Users can perform all major cluster and job management operations from the command line without writing
+  Python code. Output is available in table, JSON, and YAML formats for easy scripting and automation. Shell completion works
+  for bash, zsh, and fish. Quick status checks are 5x faster than the current Python script approach. CI/CD pipelines can
+  integrate cluster management using standard shell commands.'

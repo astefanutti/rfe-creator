@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit(artifacts/**)",
+      "Write(artifacts/**)",
+      "Write(rfe-assess/**)",
+      "Glob",
+      "Grep",
+      "Bash(python3 scripts/*)",
+      "Bash(python3 .context/assess-rfe/scripts/*)",
+      "Bash(bash scripts/*)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(cat *)",
+      "Bash(test *)",
+      "Bash(touch *)",
+      "Bash(find *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(sed *)",
+      "Bash(grep *)",
+      "Bash(echo *)",
+      "Bash(env *)",
+      "Skill",
+      "Agent",
+      "ToolSearch",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList"
+    ],
+    "deny": [
+      "mcp__atlassian__*"
+    ]
+  }
+}

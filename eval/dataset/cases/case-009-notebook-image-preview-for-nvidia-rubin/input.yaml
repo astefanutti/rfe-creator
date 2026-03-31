@@ -1,0 +1,244 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1535
+title: Notebook image preview for NVIDIA Rubin architecture
+priority: Undefined
+size: XL
+status: Ready
+source_jira_status: Stakeholder review
+source_labels: []
+rfe_content: '### Feature
+
+
+  **Feature Overview (mandatory)**
+
+  Deliver Day 0 Vera Rubin GPU support in OpenShift AI notebook images, ensuring that data scientists and AI/ML developers
+  can use Jupyter notebooks with PyTorch and CUDA on Vera Rubin NVL72 hardware from launch. This requires validating and shipping
+  notebook images with CUDA 13.x, PyTorch with Vera Rubin support, and ARM (aarch64) compatibility for the Vera CPU, as part
+  of the OpenShift for NVIDIA "fast lane" stack.
+
+
+  The current notebook image "Jupyter | PyTorch | CUDA | Python 3.12" (tag v2025.1) already functions with CUDA 13.0 and correctly
+  detects and utilizes GPUs. This feature builds on that foundation to formally validate and certify Vera Rubin support, ensure
+  driver compatibility, and deliver updated images aligned with NVIDIA''s Vera Rubin software stack.
+
+
+  RHOAI: OpenShift AI notebook images
+
+  RHEL AI: RHEL AI workbench images
+
+  RHAIIS: N/A (notebook-specific feature)
+
+
+  **Goals (mandatory)**
+
+
+  *Who benefits from this Feature, and how?*
+
+
+  Data scientists and AI/ML developers benefit from Day 0 access to Vera Rubin GPUs in their familiar Jupyter notebook environment,
+  enabling immediate experimentation, prototyping, and model development on the latest NVIDIA architecture without manual
+  environment setup.
+
+
+  PyTorch users benefit because Vera Rubin support in PyTorch requires CUDA 13.x and updated GPU kernels — the notebook images
+  ship these pre-validated, so users can focus on their models rather than environment configuration.
+
+
+  Enterprise organizations, neo-cloud providers, and sovereign cloud operators deploying OpenShift for NVIDIA benefit from
+  a complete, validated AI development stack on Vera Rubin NVL72 from Day 0.
+
+
+  *What is the difference between today''s current state and a world with this Feature?*
+
+
+  Today: The "Jupyter | PyTorch | CUDA | Python 3.12" v2025.1 notebook image works with CUDA 13.0 and GPUs are correctly detected.
+  However, Vera Rubin GPUs are not formally validated, ARM (aarch64) notebook images for the Vera CPU are not shipped, and
+  driver/toolkit alignment with NVIDIA''s Vera Rubin software stack is not guaranteed.
+
+
+  With this Feature: Notebook images are formally validated on Vera Rubin NVL72, ship with the correct CUDA 13.x toolkit and
+  NVIDIA driver versions, include ARM (aarch64) variants for Vera CPU, and are available in OpenShift AI from the Vera Rubin
+  launch date — delivering Day 0 notebook readiness as part of the OpenShift for NVIDIA stack.
+
+
+  **Requirements** (mandatory):
+
+
+  | Requirement | Notes | isMVP? |  |  |  |
+
+  | --- | --- | --- | --- | --- | --- |
+
+  | Validate CUDA 13.x in notebook images for Vera Rubin | Current v2025.1 image already uses CUDA 13.0; validate on Vera
+  Rubin silicon | Yes |  |  |  |
+
+  | PyTorch with Vera Rubin GPU support | Requires CUDA 13.x and Vera Rubin GPU kernels | Yes |  |  |  |
+
+  | ARM (aarch64) notebook images | Vera Rubin NVL72 uses Vera CPU (ARM); notebook images must be multi-arch | Yes |  |  |  |
+
+  | NVIDIA driver alignment for Vera Rubin | Validate minimum driver version per NVIDIA release notes | Yes |  |  |  |
+
+  | Jupyter | PyTorch | CUDA | Python 3.12 image update | Base notebook image with Vera Rubin support | Yes |
+
+  | GPU detection and utilization validation | Vera Rubin GPU visible in notebook, CUDA device queries return correct info
+  | Yes |  |  |  |
+
+  | Multi-GPU support in notebooks | Notebooks can access multiple Vera Rubin GPUs (NVL72 fabric) | Yes |  |  |  |
+
+  | Updated base OS to match RHEL for NVIDIA baseline | Align with Voyager kernel / RHEL for NVIDIA requirements | Yes |  |  |  |
+
+  | TensorRT / cuDNN updates for Vera Rubin | NVIDIA inference libraries updated for Vera Rubin architecture | No |  |  |  |
+
+  | Additional notebook image variants (TensorFlow, etc.) | Beyond PyTorch base image | No |  |  |  |
+
+
+  **Done - Acceptance Criteria (mandatory)**
+
+
+  - "Jupyter | PyTorch | CUDA | Python 3.12" notebook image launches on OpenShift for NVIDIA with Vera Rubin NVL72
+
+  - CUDA 13.x toolkit is available and functional in the notebook environment
+
+  - `torch.cuda.is_available()` returns True; `torch.cuda.get_device_name()` correctly identifies Vera Rubin GPU
+
+  - PyTorch training and inference workloads execute successfully on Vera Rubin GPUs from within notebooks
+
+  - ARM (aarch64) notebook image variant is available and functional on Vera CPU
+
+  - NVIDIA driver version meets minimum requirements per NVIDIA Vera Rubin release notes
+
+  - Notebook image is available in OpenShift AI image catalog at Vera Rubin launch (Tech Preview: Jun 2026, GA: Oct 2026)
+
+  - Documentation reflects Vera Rubin notebook support, driver requirements, and CUDA version
+
+
+  **Use Cases - User Experience & Workflow:**
+
+
+  1. Data scientist opens OpenShift AI dashboard on an OpenShift for NVIDIA cluster with Vera Rubin NVL72 hardware
+
+  2. Selects "Jupyter | PyTorch | CUDA | Python 3.12" notebook image from the catalog — Vera Rubin-compatible image is available
+
+  3. Notebook spawns on a Vera Rubin GPU node; GPU is automatically attached via GPU Operator
+
+  4. User runs `import torch; print(torch.cuda.get_device_name(0))` — Vera Rubin GPU is detected
+
+  5. User trains or fine-tunes a model using PyTorch — GPU acceleration works with CUDA 13.x
+
+  6. For multi-GPU workloads, user leverages multiple Vera Rubin GPUs via PyTorch DDP within the notebook
+
+
+  **Out of Scope**
+
+
+  - CUDA 14.x support (future feature)
+
+  - Vera Rubin support in non-notebook components (inference server, llm-d — separate features)
+
+  - x86 Rubin NVL8 notebook support (separate track)
+
+  - Custom notebook images built by end users
+
+  - Notebook support on non-OpenShift for NVIDIA platforms (standard OpenShift)
+
+
+  **Documentation Considerations**
+
+
+  - Update notebook image compatibility matrix to include Vera Rubin GPU and CUDA 13.x
+
+  - Document NVIDIA driver requirements for Vera Rubin notebook workloads (link to NVIDIA official release notes for driver/toolkit
+  mapping)
+
+  - Provide migration guidance for users moving from Grace Blackwell (CUDA 12.x) to Vera Rubin (CUDA 13.x) notebooks
+
+  - Document ARM (aarch64) notebook image availability and any differences from x86 images
+
+  - Update OpenShift AI notebook catalog documentation
+
+
+  **Questions to Answer**
+
+
+  - CUDA 13.x GA timeline from NVIDIA — is current 13.0 sufficient or will a specific update be required for Vera Rubin?
+
+  - PyTorch Vera Rubin support timeline — which PyTorch version will include Vera Rubin GPU kernels?
+
+  - Vera Rubin hardware access timeline for notebook image validation
+
+  - ARM (aarch64) notebook image build pipeline readiness (multi-arch CI/CD)
+
+  - NVIDIA driver minimum version for Vera Rubin — not yet published
+
+
+  **Background and Strategic Fit**
+
+  Notebook images are the primary entry point for data scientists on OpenShift AI. Day 0 Vera Rubin support in notebooks ensures
+  that the OpenShift for NVIDIA stack delivers value from the developer''s first interaction — not just at the infrastructure
+  or inference-serving layer. The current v2025.1 "Jupyter | PyTorch | CUDA | Python 3.12" image already demonstrates CUDA
+  13.0 readiness with correct GPU detection, providing a strong foundation for Vera Rubin validation. Aligns with Vera Rubin
+  milestones: Tech Preview (Jun 2026), GA (Oct 2026).
+
+
+  **Customer Considerations:**
+
+
+  - Data scientists expect notebooks to "just work" on new GPU hardware — Day 0 readiness is table stakes
+
+  - ARM (aarch64) notebook images are new for most customers; clear documentation is essential
+
+  - Vera Rubin NVL72 hardware availability in H2 2026
+
+  - CUDA version transitions (12.x → 13.x) may affect user code; migration guidance needed
+
+  - Customers running existing workloads on Grace Blackwell will need clear upgrade path
+
+
+  **Team Sign Off**
+
+
+  | Reviewed By | Team Name | Accepted | Notes |
+
+  | --- | --- | --- | --- |
+
+  |  | OpenShift AI (Notebooks) |  |  |
+
+  |  | Red Hat AI |  |  |
+
+  |  | Ecosystem Engineering (GPU Operator) |  |  |
+
+  |  | NVIDIA |  |  |'
+prompt: We need to make sure our OpenShift AI notebook images are ready for NVIDIA's upcoming Vera Rubin architecture (NVL72)
+  from Day 0. The current PyTorch/CUDA notebook image already works with CUDA 13.0 and detects GPUs fine, but we need to formally
+  validate it on Vera Rubin silicon, ship ARM/aarch64 variants for the Vera CPU, and align drivers with NVIDIA's software
+  stack. This is part of the broader OpenShift for NVIDIA 'fast lane' initiative and we need Tech Preview by June 2026 and
+  GA by October 2026.
+clarifying_context: 'Customers: Enterprise organizations deploying OpenShift for NVIDIA, neo-cloud providers, sovereign cloud
+  operators, and data science teams using OpenShift AI notebooks for AI/ML development on latest NVIDIA hardware. Key partners
+  include NVIDIA directly.
+
+  Business justification: Day 0 GPU support in notebooks is table stakes for the OpenShift for NVIDIA partnership stack. Notebook
+  images are the primary entry point for data scientists on OpenShift AI — without Vera Rubin readiness at launch, the entire
+  developer experience layer of the stack is incomplete. This is a strategic investment aligned with NVIDIA Vera Rubin milestones
+  (Tech Preview Jun 2026, GA Oct 2026) and directly supports the OpenShift for NVIDIA fast lane program.
+
+  User problem: Today, the v2025.1 ''Jupyter | PyTorch | CUDA | Python 3.12'' notebook image works with CUDA 13.0 and GPUs
+  are detected, but Vera Rubin GPUs are not formally validated, ARM (aarch64) notebook images for the Vera CPU are not shipped,
+  and driver/toolkit alignment with NVIDIA''s Vera Rubin software stack is not guaranteed. Data scientists deploying on Vera
+  Rubin NVL72 hardware cannot be confident notebooks will work correctly without manual environment setup, and there is no
+  multi-arch support for the ARM-based Vera CPU.
+
+  Scope: Single focused need — validating and certifying existing notebook images for Vera Rubin architecture. MVP includes:
+  CUDA 13.x validation on Vera Rubin, PyTorch with Vera Rubin GPU kernel support, ARM aarch64 multi-arch notebook images,
+  NVIDIA driver alignment, GPU detection and multi-GPU support validation, and base OS alignment with RHEL for NVIDIA baseline.
+  Non-MVP stretch items include TensorRT/cuDNN updates and additional notebook image variants like TensorFlow. Out of scope:
+  CUDA 14.x, non-notebook components (inference server, llm-d), x86 Rubin NVL8, custom user-built images, non-OpenShift for
+  NVIDIA platforms.
+
+  Success criteria: The ''Jupyter | PyTorch | CUDA | Python 3.12'' notebook image launches successfully on OpenShift for NVIDIA
+  with Vera Rubin NVL72 hardware. torch.cuda.is_available() returns True and torch.cuda.get_device_name() correctly identifies
+  the Vera Rubin GPU. PyTorch training and inference workloads execute successfully on Vera Rubin GPUs from within notebooks.
+  ARM aarch64 notebook image variant is available and functional on Vera CPU. NVIDIA driver version meets minimum requirements
+  per Vera Rubin release notes. Notebook image is available in the OpenShift AI image catalog at Vera Rubin launch dates (Tech
+  Preview Jun 2026, GA Oct 2026). Documentation is updated with Vera Rubin support details, driver requirements, CUDA version
+  info, and migration guidance from Grace Blackwell (CUDA 12.x) to Vera Rubin (CUDA 13.x).'

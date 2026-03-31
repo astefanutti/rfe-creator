@@ -1,0 +1,83 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1564
+title: Responses API Observability Integration
+priority: Major
+size: L
+status: Ready
+source_jira_status: New
+source_labels: []
+rfe_content: '## Problem Statement
+
+
+  Responses API calls on RHOAI are not instrumented with GenAI-specific telemetry. Operations teams cannot trace requests,
+  measure token usage, or monitor latency and error rates for Responses API workloads — making it impossible to debug issues,
+  optimize costs, or meet SLA requirements.
+
+
+  ## Affected Customers
+
+
+  - **Amadeus** — "OpenTelemetry is really important — to trace between agent and LLM" — 500+ AI initiatives requiring observability
+
+  - **T-Mobile** — "Comprehensive observability for agents, token usage, performance metrics"
+
+  - **BofA** — "Comprehensive observability and monitoring of entire LLM inferencing pipeline"
+
+  - **Poste Italiane** — "Real-time model performance visibility across operations"
+
+
+  ## Business Justification
+
+
+  Four named customers with large-scale AI deployments require GenAI-specific observability for the Responses API. Amadeus
+  alone has 500+ AI initiatives. Without instrumentation, operations teams are blind to Responses API behavior in production.
+
+
+  ## Acceptance Criteria
+
+
+  - **[MUST]** Responses API calls traced with GenAI semantic conventions (gen_ai.usage.input_tokens, gen_ai.response.model,
+  etc.)
+
+  - **[MUST]** Integration with OTEL for end-to-end trace visibility
+
+  - **[SHOULD]** Integration with MLflow for experiment tracking and tracing
+
+  - **[SHOULD]** Dashboard templates for monitoring usage, latency, and error rates
+
+  - **[COULD]** Per-user/per-agent usage attribution for chargeback
+
+
+  ## Success Criteria
+
+
+  - Every Responses API call generates a traceable OTEL span with GenAI attributes
+
+  - Dashboard shows real-time latency, token usage, and error rates'
+prompt: We're getting consistent feedback from large enterprise customers that they have no visibility into Responses API
+  workloads running on RHOAI. Operations teams can't trace requests, see token usage, or monitor latency and errors. This
+  is a blocker for production deployments — customers like Amadeus and T-Mobile are specifically asking for OpenTelemetry-based
+  observability for their AI agents and LLM inferencing pipelines. We need to instrument the Responses API with GenAI-specific
+  telemetry.
+clarifying_context: 'Customers: Amadeus (500+ AI initiatives, explicitly stated ''OpenTelemetry is really important — to trace
+  between agent and LLM''), T-Mobile (needs comprehensive observability for agents, token usage, performance metrics), Bank
+  of America (requires comprehensive observability and monitoring of entire LLM inferencing pipeline), Poste Italiane (needs
+  real-time model performance visibility across operations)
+
+  Business justification: Four named enterprise customers with large-scale AI deployments require GenAI-specific observability
+  for the Responses API. Amadeus alone has 500+ AI initiatives. Without instrumentation, operations teams are completely blind
+  to Responses API behavior in production, blocking production readiness and SLA compliance. These are strategic accounts
+  with significant expansion potential.
+
+  User problem: Responses API calls on RHOAI are not instrumented with GenAI-specific telemetry. Operations teams cannot trace
+  requests, measure token usage, or monitor latency and error rates for Responses API workloads. This makes it impossible
+  to debug issues, optimize costs, or meet SLA requirements in production environments.
+
+  Scope: Single focused need — adding GenAI-specific observability instrumentation to the Responses API. Core requirement
+  is OTEL integration with GenAI semantic conventions. Secondary needs include MLflow integration for experiment tracking,
+  dashboard templates, and per-user/per-agent usage attribution for chargeback.
+
+  Success criteria: Every Responses API call generates a traceable OTEL span with GenAI attributes (e.g., gen_ai.usage.input_tokens,
+  gen_ai.response.model). A dashboard shows real-time latency, token usage, and error rates. End-to-end trace visibility is
+  available through OpenTelemetry integration.'

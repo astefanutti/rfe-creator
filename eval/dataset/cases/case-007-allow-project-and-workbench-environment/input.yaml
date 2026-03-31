@@ -1,0 +1,79 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1549
+title: Allow project and workbench environment variables to reference existing Kubernetes Secrets
+priority: Major
+size: XL
+status: Ready
+source_jira_status: Stakeholder review
+source_labels:
+- 3.5-candidate
+- needs-tech-review
+rfe_content: "When creating or editing a workbench in the OpenShift AI dashboard, the \"Environment variables\" section only\
+  \ allows users to create *new* secrets by entering key/value pairs. There is no option to browse and attach *existing* Kubernetes\
+  \ Secrets that already exist in the namespace — such as those created by the External Secrets Operator, GitOps tooling,\
+  \ or a cluster admin.\n\n**Problem:**\n\nOrganizations using the External Secrets Operator (ESO) with backends like HashiCorp\
+  \ Vault manage secrets centrally and sync them into namespaces as standard Kubernetes Secrets. The current RHOAI dashboard\
+  \ UI forces users to either:\n\n1. Duplicate secret values by manually re-entering them as new inline secrets in the workbench\
+  \ form, defeating the purpose of centralized secret management.\n2. Edit the Notebook CR YAML directly after creation to\
+  \ add `envFrom` / `secretRef` blocks pointing to the existing secret — a workaround that bypasses the dashboard and is invisible\
+  \ in the UI.\n\nBoth options break the workflow that ESO + Vault is designed to enable: platform teams manage secrets centrally,\
+  \ and data scientists consume them by name without ever seeing or handling the values.\n\n**Proposed Behavior:**\n\nIn the\
+  \ workbench creation/edit form under \"Environment variables\", when \"Secret\" or ‘Config Map’ is selected as the variable\
+  \ type, add a third option alongside \"Key / value\" and \"Upload\":\n\n- **\"Existing secret/Config Map\"** — presents\
+  \ a dropdown listing all Kubernetes Secrets in the current namespace. The user selects one, chooses \"All keys\" or picks\
+  \ specific keys, and the dashboard writes the appropriate `envFrom` or `env.valueFrom.secretKeyRef` into the Notebook CR.\n\
+  \nMockup of the dropdown flow:\n\n```\nVariable type:  [Secret ▼]\n\n  ○ Key / value          (create new — existing behavior)\n\
+  \  ○ Upload               (upload file — existing behavior)\n  ● Existing secret      (new)\n      [s3-credentials     ▼]\n\
+  \      ☑ Select all keys\n```\n\nShort term (RHOAI dashboard change):\n  The \"Existing secret\" dropdown lists ALL Opaque\
+  \ secrets.\n  No labels required. Works immediately with ESO, ArgoCD, etc.\n\nLonger term (RHOAI platform enhancement):\n\
+  \  A mutating webhook auto-labels Opaque secrets in DSP namespaces\n  so they also appear in the Connections view, get tracked\
+  \ in the\n  dashboard's inventory, and benefit from RHOAI's secret lifecycle\n  management (e.g., showing which workbenches\
+  \ use which secrets).\n\n**Acceptance Criteria:**\n\n- User can select an existing Kubernetes Secret from a namespace-scoped\
+  \ dropdown when adding environment variables to a workbench.\n- Selected secrets are injected via `envFrom.secretRef` in\
+  \ the Notebook CR.\n- Secrets managed by external controllers (ESO, ArgoCD, etc.) appear in the dropdown alongside manually-created\
+  \ secrets.\n- The UI should display the secret's keys (but not values) so the user knows what environment variables will\
+  \ be injected.\n- Editing a workbench shows which existing secrets are already attached.\n\n**Use Case:**\n\n1. A platform\
+  \ team stores S3 credentials in HashiCorp Vault. The External Secrets Operator syncs them into the `demo-ai` namespace as\
+  \ a Kubernetes Secret called `s3-credentials`. A data scientist creates a workbench and wants to use those credentials.\
+  \ Today they cannot do this through the UI — they must edit YAML. With this feature, they select `s3-credentials` from a\
+  \ dropdown and the credentials are available as `$AWS_ACCESS_KEY_ID`, `$AWS_SECRET_ACCESS_KEY`, etc. in their notebook.\n\
+  \n**Labels:** `ui`, `workbench`, `secrets`, `external-secrets-operator`\n\n\n\n1. I create a secret/config map in the env\
+  \ vars field in workbench #1\nIn creating workbench #2 in the same project, I look at ‘existing secret/config map’ to add\
+  \ the secret/configmap created in workbench #2 and am able to successfully add it\n\n\n\nThese pain points have been brought\
+  \ up by the multiple sales folks as well as raised by Airbus through a support case."
+comments: '# Comments: RHAIRFE-1549
+
+
+  ## Jenny Yi — 2026-03-30
+
+  shared that we can’t seem to create multiple of the same connection (like 2 S3 connections to Workbenches. Should roll into
+  the same enhancement STRAT
+
+  '
+prompt: Our customers using External Secrets Operator with HashiCorp Vault can't attach their existing Kubernetes Secrets
+  to workbenches through the RHOAI dashboard. They have to either duplicate secret values manually or edit the Notebook CR
+  YAML directly, which completely defeats the purpose of centralized secret management. We need the workbench environment
+  variables UI to support selecting existing secrets and config maps from the namespace, not just creating new ones inline.
+clarifying_context: 'Customers: Airbus (raised via support case), multiple enterprise accounts flagged by sales teams, organizations
+  using External Secrets Operator with HashiCorp Vault backends
+
+  Business justification: Multiple sales engagements have surfaced this as a blocker, and Airbus has filed a formal support
+  case. Enterprises with mature secret management workflows (ESO, GitOps/ArgoCD, Vault) cannot adopt RHOAI workbenches without
+  cumbersome workarounds, creating friction in deals and reducing platform credibility.
+
+  User problem: Data scientists cannot attach existing Kubernetes Secrets to workbenches through the dashboard UI. They are
+  forced to either manually duplicate secret values (breaking centralized secret management) or edit Notebook CR YAML directly
+  (bypassing the dashboard and invisible in the UI). Platform teams want to manage secrets centrally so data scientists consume
+  them by name without ever seeing raw values, but the current UI only supports creating new inline secrets.
+
+  Scope: Focused need with two phases. Short term: add an ''Existing secret/Config Map'' option in the workbench environment
+  variables form that lists all Opaque secrets and config maps in the namespace via a dropdown, no special labels required.
+  Longer term: platform enhancement with a mutating webhook to auto-label secrets for Connections view integration and lifecycle
+  management. Also applies to reusing secrets/config maps created in one workbench across other workbenches in the same project.
+
+  Success criteria: Users can select existing Kubernetes Secrets and Config Maps from a namespace-scoped dropdown when adding
+  environment variables to a workbench. Selected secrets are injected via envFrom.secretRef in the Notebook CR. Secrets from
+  external controllers (ESO, ArgoCD) appear in the dropdown. The UI displays secret keys (not values) so users know what env
+  vars will be injected. Editing a workbench shows which existing secrets are already attached. Secrets created for one workbench
+  can be reused in another workbench in the same project through the same dropdown.'

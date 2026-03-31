@@ -1,0 +1,76 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1531
+title: LlamaStack Support for Claude Code Agent SDK
+priority: Critical
+size: XL
+status: Ready
+source_jira_status: Approved
+source_labels:
+- LlamaStack
+- needs-tech-review
+rfe_content: "#### ***General guidance: ****RFEs should be well scoped and focused so the RFE council can effectively evaluate\
+  \ them. For feature enhancements that are significantly larger in scope, start with high level requirements and collaborate\
+  \ with one or more of the RFE council members to refine the scope.*\n\n#### ***Some guiding principles:***\n\n1. *Smaller\
+  \ RFEs are preferred*\n2. *RFEs that are too broad should not be prescriptive about solutions*\n3. *If an RFE is prescriptive,\
+  \ it should be for a well defined domain (e.g., supporting a particular accelerator type for distributed training/inference)*\n\
+  \n*RFEs that do not follow these guidelines or principles will be rejected and request revisions.*\n\n#### **Problem Statement**\n\
+  \n*Many of our customers have started using the Claude code Agent SDK. And for them to use LlamaStack, we need to enable\
+  \ the LlamaStack API that can be used with the Claude code Agent SDK. Currently, LlamaStack (LLS) lacks the native API surface\
+  \ and state handling required to support the Claude SDK's orchestration logic.*\n\n#### **Business Alignment**\n\n1. *What\
+  \ is the Business Value and/or Impact of this?*\n\n  1. *Potentially, all the AI Agents that are being built at ****Verizon****\
+  \ are going to be using the Claude Code Agent SDK.*\n  2. *Taking Agents built using Agent SDK and then deploying them with\
+  \ LLS can bring in business worth millions.*\n  3. *Cost & Governance: Centralizing \"Agentic\" traffic through LlamaStack\
+  \ allows for unified audit trails, security filtering, and massive cost savings over third-party hosted models.*\n\n####\
+  \ **Proposed Solution/Rationale**\n\n*Implement a specialized compatibility layer within LlamaStack that supports the expected\
+  \ behavior of the Claude Code SDK. This includes:*\n\n***Server-Sent Events (SSE) Streaming****: Enabling real-time token\
+  \ delivery so developers can monitor code generation as it happens, preventing \"timeout\" perceptions during long-form\
+  \ file writes.*\n\n***Stateful Session Management****: Implementing a server-side \"Thread/Session\" store within LlamaStack.\
+  \ This allows the Claude SDK to maintain context across multiple tool-calls (e.g., searching a codebase, then editing a\
+  \ file based on those search results) without passing the entire conversation history in every request.*\n\n***Schema Translation:****\
+  \ A mapping engine to translate Claude-specific tool definitions into LlamaStack’s internal tool-calling structures.*\n\n\
+  #### **Acceptance Criteria**\n\n***Context Persistence: ****Successful execution of a 5+ turn conversation where LlamaStack\
+  \ retains state/memory across turns without SDK-side overhead.*\n\n***Tool-Call Interoperability:**** Verified support for\
+  \ the Claude SDK’s computer, text_editor, and bash tool definitions.*\n\n***Latency Guardrails:**** Streaming \"Time to\
+  \ First Token\" (TTFT) must be under 200ms to maintain developer productivity.*\n\n***State Recovery:**** Ability to resume\
+  \ a session via a session_id after a network disconnect.*\n\n#### **Affected Customers/Partners & Scope (Optional, though\
+  \ desired)**\n\n*This is a Customer request from Verizon Networks, which is the 5th largest customer of OpenShift. We want\
+  \ to make sure that they keep using OpenShift and adopt OpenShift AI.*\n\n#### **Reference Documents/Links (Optional, though\
+  \ desired)**\n\n*An email from the customer is shared with Adel.*"
+comments: "# Comments: RHAIRFE-1531\n\n## Sebastien Han — 2026-03-25\nI’m confused about the framing of the RFE. The Claude\
+  \ Code Agent SDK is a client-side orchestration framework, it talks to the Anthropic Messages API (/v1/messages), not the\
+  \ OpenAI API. LlamaStack implements the OpenAI Responses API. These are fundamentally different API surfaces. We can't just\
+  \ add a \"compatibility layer\", we'd need to implement the entire Anthropic Messages API as a separate endpoint set (/v1/messages).\n\
+  \n is this what’s being asked here? Thanks!\n\n## Adel Zaalouk — 2026-03-25\nyes, the ask is messages api mostly. If we\
+  \ decide llama stack is not the place for that, we need to route it to the correct place IMO (messages is becoming important).\n\
+  \n## Sebastien Han — 2026-03-30\nAssessment: Accepted\nPrimary component: Llama Stack Core\nImpacted components: Llama Stack\
+  \ Core\nHigh level architecture plan: Implement the Anthropic Messages API (/v1/messages) as a new API surface in LlamaStack,\
+  \ translating between Anthropic's request/response format and the existing inference provider layer. This includes a new\
+  \ FastAPI router that accepts Anthropic-style requests, maps them to the internal inference protocol, and returns Anthropic-formatted\
+  \ responses including SSE streaming. This is purely additive — no changes to existing OpenAI-compatible endpoints.\n\n##\
+  \ Automation for Jira — 2026-03-30\nThe RFE is in status \"PENDING APPROVAL\". \n\nThe next step is for the Product Manager\
+  \ to change the status to  \"APPROVED\" and to manually clone the RFE to create a Feature in the RHAISTRAT Jira project.\n"
+prompt: Verizon Networks is building AI Agents using the Claude Code Agent SDK and they need LlamaStack to work with it. Right
+  now LlamaStack doesn't have the API surface or state handling to support the Claude SDK's orchestration logic. We need to
+  build a compatibility layer so customers can deploy agents built with the Claude Code Agent SDK through LlamaStack. This
+  is critical for keeping Verizon on OpenShift and driving OpenShift AI adoption.
+clarifying_context: 'Customers: Verizon Networks — 5th largest OpenShift customer. They are building AI Agents using the Claude
+  Code Agent SDK and want to deploy them through LlamaStack on OpenShift AI.
+
+  Business justification: Verizon''s agentic AI workloads represent business worth millions. Keeping Verizon on OpenShift
+  and driving OpenShift AI adoption is a strategic priority. Centralizing agentic traffic through LlamaStack enables unified
+  audit trails, security filtering, and massive cost savings over third-party hosted models.
+
+  User problem: LlamaStack currently lacks the native API surface and state handling required to support the Claude Code Agent
+  SDK''s orchestration logic. Customers building agents with the Claude SDK cannot deploy them through LlamaStack — there''s
+  no SSE streaming support for real-time token delivery, no stateful session management for multi-turn tool-call conversations,
+  and no schema translation between Claude-specific tool definitions and LlamaStack''s internal tool-calling structures.
+
+  Scope: Focused compatibility layer with three main components — (1) Server-Sent Events streaming for real-time token delivery,
+  (2) stateful server-side session/thread management so the Claude SDK can maintain context across multiple tool calls without
+  passing full conversation history each request, and (3) a schema translation engine to map Claude-specific tool definitions
+  to LlamaStack''s internal structures.
+
+  Success criteria: Context persistence verified via successful 5+ turn conversations where LlamaStack retains state across
+  turns without SDK-side overhead; tool-call interoperability verified for Claude SDK''s computer, text_editor, and bash tool
+  definitions; streaming Time to First Token under 200ms; ability to resume a session via session_id after a network disconnect.'

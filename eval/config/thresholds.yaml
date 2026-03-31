@@ -1,0 +1,12 @@
+deterministic:
+  all_pass: true
+
+reference:
+  max_score_deviation: 2
+  max_criterion_deviation: 1
+  min_recommendation_match_rate: 0.8
+  min_feasibility_match_rate: 0.9
+
+llm_judge:
+  min_mean_score: 3.5
+  min_calibration_accuracy: 3.0

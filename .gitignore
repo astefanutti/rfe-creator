@@ -1,4 +1,6 @@
 .DS_Store
+.env
+.venv/
 .context/
 artifacts/
 .claude/skills/assess-rfe/

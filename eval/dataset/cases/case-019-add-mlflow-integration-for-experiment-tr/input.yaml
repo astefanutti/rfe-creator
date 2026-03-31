@@ -1,0 +1,75 @@
+pipeline: rfe.speedrun
+input_type: derived_prompt
+rfe_id: RHAIRFE-1479
+title: Add MLflow Integration for Experiment Tracking in AI Training Pipeline
+priority: Undefined
+size: XL
+status: Ready
+source_jira_status: Approved
+source_labels:
+- 3.5-candidate
+- needs-review
+rfe_content: "## **Problem Statement**\n\nWhile the current AI training pipeline already provides:\n\n- Modular training strategies\
+  \ (LoRA, SFT, OSFT)\n- Integration with Eval Hub for standardized evaluation\n\nit still lacks **native experiment tracking\
+  \ and observability**.\n\n### Key Gap: Limited Observability & Experiment Tracking\n\n- No built-in integration with MLflow\n\
+  - Users cannot:\n  - Compare experiment runs across training strategies\n  - Track parameter impact on performance\n  -\
+  \ Inspect metrics and artifacts in a centralized location\n- Debugging, optimization, and reproducibility remain **manual\
+  \ and fragmented**\n\n\n\n## **Proposed Solution**\n\n### **Enhancement: MLflow Integration for Training Pipeline Observability**\n\
+  \nIntroduce **first-class MLflow integration** into the existing pipeline to enable:\n\n- Experiment tracking\n- Run comparison\n\
+  - Metric visualization\n- End-to-end lineage\n\n## **Pipeline Architecture (Incremental Change)**\n\n```\n{validate_dataset}\n\
+  {select_training_strategy}\n    ├── {train_lora}\n    ├── {train_sft}\n    └── {train_osft}\n{evaluate_with_eval_hub}\n\
+  {register_model}\n{log_to_mlflow}\n```\n\n> Note: Training modularity and Eval Hub integration remain unchanged.\n\n## **New\
+  \ / Enhanced Component**\n\n### **log_to_mlflow (New Component or Cross-Cutting Concern)**\n\nPowered by MLflow\n\n####\
+  \ **Responsibilities**\n\nCapture and log the full pipeline context:\n\n1. **Parameters**\n\n- Training strategy (LoRA /\
+  \ SFT / OSFT)\n- Hyperparameters\n- Dataset version / metadata\n\n1. **Metrics**\n\n- Evaluation results from Eval Hub\n\
+  - Training metrics (loss, accuracy, etc.)\n\n1. **Artifacts**\n\n- Model artifacts\n- Logs\n- Evaluation reports\n\n1. **Lineage**\n\
+  \n- Pipeline run ID\n- Model version (linked to registry)\n- Dataset reference\n\n## **Component-Level Enhancements**\n\n\
+  ### **validate_dataset**\n\n- Add dataset metadata logging to MLflow\n\n### **Training Components (No Structural Change)**\n\
+  \n- train_lora / train_sft / train_osft:\n  - Emit training metrics to MLflow\n  - Log intermediate artifacts (optional)\n\
+  \n### **evaluate_with_eval_hub**\n\n- Forward evaluation outputs to MLflow\n- Ensure metric standardization for comparison\n\
+  \n### **register_model**\n\n- Attach MLflow run ID to registered model\n- Persist evaluation + experiment metadata linkage\n\
+  \n## **Key Benefits**\n\n### **1. Observability & Experimentation**\n\n- Centralized tracking of all experiments via MLflow\n\
+  - Easy comparison across:\n  - Training strategies\n  - Hyperparameters\n  - Dataset versions\n\n### **2. Improved Reproducibility**\n\
+  \n- Every run is fully traceable:\n  - Pipeline → MLflow → Model Registry\n- Eliminates ambiguity in experiment history\n\
+  \n### **3. Developer Productivity**\n\n- Faster debugging and iteration\n- Reduced need for ad-hoc tracking solutions\n\
+  - Clear visibility into performance drivers\n\n### **4. Enterprise Alignment**\n\n- Standardized experiment tracking\n-\
+  \ Better auditability and governance\n- Aligns with existing ML observability practices\n\n## **Acceptance Criteria**\n\n\
+  ### **Pipeline Execution**\n\n- End-to-end pipeline runs successfully with MLflow logging enabled\n\n### **MLflow Integration**\n\
+  \nEach run logs:\n\n- Parameters\n- Metrics\n- Artifacts\n- Lineage\n\n### **Cross-Component Traceability**\n\n- MLflow\
+  \ run is linked to:\n  - Pipeline run\n  - Model Registry entry\n  - Evaluation results (Eval Hub)\n\n### **Usability**\n\
+  \n- Users can:\n  - Compare runs in MLflow UI\n  - Inspect metrics and artifacts\n  - Trace experiment lineage without external\
+  \ tooling"
+comments: "# Comments: RHAIRFE-1479\n\n## Ana Biazetti — 2026-03-24\n- **Assessment:** Accepted\n- **Requires architecture\
+  \ review:** [No]\n- **Primary component:** Fine Tuning\n- **Impacted components:** AI Pipelines, MLFlow\n- **High level\
+  \ architecture plan:** AI Pipelines (as of 3.4 GA) will have a default integration with MLFlow which should be used by default.\
+  \ This RFE should be used to try out and test this default integration, and add additional metrics/logs which are not taken\
+  \ care of by the default integration.\n\n- **Other related work:** AI Pipelines default integration with MLFlow. [https://issues.redhat.com/browse/RHAISTRAT-1161](https://issues.redhat.com/browse/RHAISTRAT-1161)\n\
+  \n## Automation for Jira — 2026-03-24\nThe RFE is in status \"PENDING APPROVAL\". \n\nThe next step is for the Product Manager\
+  \ to change the status to  \"APPROVED\" and to manually clone the RFE to create a Feature in the RHAISTRAT Jira project.\n"
+prompt: Our AI training pipeline supports multiple training strategies like LoRA, SFT, and OSFT, and we already have Eval
+  Hub integration for evaluation, but we have no centralized experiment tracking. Teams are manually comparing runs, tracking
+  hyperparameters in spreadsheets, and struggling with reproducibility. We need to integrate MLflow into the pipeline so that
+  every training run automatically logs parameters, metrics, artifacts, and lineage in one place.
+clarifying_context: 'Customers: Internal ML engineering teams, enterprise customers using the AI training platform (e.g.,
+  FinServe AI division, MedTech Labs data science group, AutoDrive ML team)
+
+  Business justification: Lack of experiment tracking is slowing down iteration cycles and making it difficult for enterprise
+  customers to meet auditability and governance requirements. At least 4 enterprise accounts have flagged experiment observability
+  as a gap during renewal discussions, representing ~$3.5M in ARR. Strategic investment in ML platform maturity and competitive
+  parity with platforms that offer built-in tracking.
+
+  User problem: Users cannot compare experiment runs across training strategies (LoRA, SFT, OSFT), track how hyperparameter
+  changes impact model performance, or inspect metrics and artifacts in a centralized location. Debugging, optimization, and
+  reproducibility are manual and fragmented — teams resort to ad-hoc spreadsheets and custom scripts to track experiments,
+  leading to lost context and unreproducible results.
+
+  Scope: Single focused enhancement — adding MLflow integration as a cross-cutting concern across the existing pipeline. No
+  structural changes to training modularity or Eval Hub integration. Touches validate_dataset (dataset metadata logging),
+  training components (metric emission), evaluate_with_eval_hub (forwarding evaluation outputs), and register_model (attaching
+  run IDs). One new component: log_to_mlflow.
+
+  Success criteria: End-to-end pipeline runs successfully with MLflow logging enabled. Each run logs parameters (strategy,
+  hyperparameters, dataset version), metrics (training loss/accuracy, Eval Hub results), artifacts (model artifacts, logs,
+  evaluation reports), and lineage (pipeline run ID, model version, dataset reference). MLflow run is linked to pipeline run,
+  Model Registry entry, and Eval Hub evaluation results. Users can compare runs in MLflow UI, inspect metrics and artifacts,
+  and trace experiment lineage without external tooling.'
