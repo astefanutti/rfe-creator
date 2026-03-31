@@ -87,17 +87,7 @@ If any IDs have `recommendation=split`, invoke `/rfe.split`:
 
 Wait for completion. The split skill handles its own review cycles internally.
 
-### 3d: Collect Errors
-
-For each ID in the batch, check for errors:
-
-```bash
-python3 scripts/frontmatter.py read artifacts/rfe-reviews/<ID>-review.md
-```
-
-If `error` field exists, add to the retry queue.
-
-### 3e: Between-Batch Summary
+### 3d: Between-Batch Summary
 
 Output a progress update:
 
@@ -111,7 +101,13 @@ Output a progress update:
 
 ## Step 4: Retry Queue
 
-After all regular batches complete, process the retry queue (if any):
+After all regular batches complete, scan ALL processed IDs for errors:
+
+```bash
+python3 scripts/collect_recommendations.py <all_processed_IDs>
+```
+
+Parse the `ERRORS=` line. If empty, skip to Step 5. For each error ID:
 
 1. For IDs with `split_failed` errors: clean up first:
 
@@ -125,7 +121,7 @@ python3 scripts/cleanup_partial_split.py <ID>
 python3 scripts/frontmatter.py set artifacts/rfe-reviews/<ID>-review.md error=null
 ```
 
-3. Run the retry batch through the full pipeline (Steps 3a-3d)
+3. Run the retry batch through the full pipeline (Steps 3a-3c)
 
 4. If they fail again, report as permanent failures
 
