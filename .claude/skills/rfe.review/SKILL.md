@@ -19,7 +19,7 @@ For each ID, check if `artifacts/rfe-tasks/<id>.md` already exists locally (use 
 
 ## Step 1: Fetch Missing RFEs
 
-For each remote ID, launch a **fetch agent** (model: sonnet, run_in_background: true):
+For each remote ID, launch a **fetch agent** (model: opus, run_in_background: true):
 
 ```
 Read .claude/skills/rfe.review/prompts/fetch-agent.md and follow all instructions. Substitute {KEY} with <ID> throughout.
@@ -75,7 +75,7 @@ cp artifacts/rfe-tasks/<ID>.md /tmp/rfe-assess/single/<ID>.md
 Read .claude/skills/rfe.review/prompts/assess-agent.md and follow all instructions. Substitute: {KEY}=<ID>, {DATA_FILE}=/tmp/rfe-assess/single/<ID>.md, {RUN_DIR}=/tmp/rfe-assess/single, {PROMPT_PATH}=.context/assess-rfe/scripts/agent_prompt.md
 ```
 
-**Launch feasibility agent** (model: sonnet, run_in_background: true) — one per ID:
+**Launch feasibility agent** (model: opus, run_in_background: true) — one per ID:
 
 ```
 Read the skill file at .claude/skills/rfe-feasibility-review/SKILL.md and follow all instructions in the body (everything after the YAML frontmatter). The RFE ID to review is: <ID>

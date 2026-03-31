@@ -2,7 +2,7 @@
 name: rfe-feasibility-review
 description: Reviews RFEs for technical feasibility, blockers, and alignment with technical strategy.
 allowed-tools: Read, Write, Grep, Glob, Bash
-model: sonnet
+model: opus
 user-invocable: false
 ---
 
