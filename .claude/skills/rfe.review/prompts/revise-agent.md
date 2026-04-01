@@ -37,7 +37,7 @@ For each criterion the assessor flagged:
 **Immediately after editing the task file**, run:
 
 ```bash
-python3 scripts/frontmatter.py set artifacts/rfe-reviews/{ID}-review.md revised=true needs_attention=<true/false>
+python3 scripts/frontmatter.py set artifacts/rfe-reviews/{ID}-review.md auto_revised=true needs_attention=<true/false>
 ```
 
 Set `needs_attention=true` if human review is still needed (e.g., missing evidence the author must provide). This is the most important step — do not skip it.
@@ -59,4 +59,4 @@ Verify no `type: unclassified` entries remain.
 
 Add what changed and why to the review file's `## Revision History` section. Do NOT add revision notes to the RFE artifact itself.
 
-Do not return a summary. Your work is complete when the task file is revised and `revised=true` is set in frontmatter.
+Do not return a summary. Your work is complete when the task file is revised and `auto_revised=true` is set in frontmatter.
