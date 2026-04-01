@@ -49,7 +49,7 @@ Sleep for the `NEXT_POLL` seconds reported by the script before polling again. O
 After all fetch agents complete, verify task files exist via Glob. For any missing, write an error to the review file:
 
 ```bash
-python3 scripts/frontmatter.py set artifacts/rfe-reviews/<ID>-review.md rfe_id=<ID> score=0 pass=false recommendation=revise feasibility=feasible revised=false needs_attention=true scores.what=0 scores.why=0 scores.open_to_how=0 scores.not_a_task=0 scores.right_sized=0 error="fetch_failed: task file not created"
+python3 scripts/frontmatter.py set artifacts/rfe-reviews/<ID>-review.md rfe_id=<ID> score=0 pass=false recommendation=revise feasibility=feasible auto_revised=false needs_attention=true scores.what=0 scores.why=0 scores.open_to_how=0 scores.not_a_task=0 scores.right_sized=0 error="fetch_failed: task file not created"
 ```
 
 Remove failed IDs from the processing list and continue with remaining IDs.
@@ -66,7 +66,7 @@ bash scripts/fetch-architecture-context.sh
 bash scripts/bootstrap-assess-rfe.sh
 ```
 
-If architecture fetch fails, proceed without it. If bootstrap fails, note it — review-and-revise agents will do basic quality checks instead.
+If architecture fetch fails, proceed without it. If bootstrap fails, note it — review agents will do basic quality checks instead.
 
 ## Step 2: Launch Assessment + Feasibility Agents
 
@@ -117,7 +117,7 @@ After completion, check prerequisites for each ID via Glob:
 For each remaining ID, launch a **review agent** (model: opus, run_in_background: true):
 
 ```
-Read .claude/skills/rfe.review/prompts/review-and-revise-agent.md and follow all instructions. Substitute: {ID}=<ID>, {ASSESS_PATH}=/tmp/rfe-assess/single/<ID>.result.md, {FEASIBILITY_PATH}=artifacts/rfe-reviews/<ID>-feasibility.md, {FIRST_PASS}=true
+Read .claude/skills/rfe.review/prompts/review-agent.md and follow all instructions. Substitute: {ID}=<ID>, {ASSESS_PATH}=/tmp/rfe-assess/single/<ID>.result.md, {FEASIBILITY_PATH}=artifacts/rfe-reviews/<ID>-feasibility.md, {FIRST_PASS}=true
 ```
 
 Launch all review agents in parallel.
@@ -164,7 +164,7 @@ python3 scripts/check_review_progress.py --phase revise --id-file tmp/rfe-poll-r
 
 Sleep for the `NEXT_POLL` seconds reported by the script before polling again. Wait for all to complete.
 
-**Post-processing: fix revised flag.** The revise agent may run out of budget before setting `revised=true`. After all agents complete, re-read the revised ID list from the poll file (compression may have lost them during agent execution):
+**Post-processing: fix auto_revised flag.** The revise agent may run out of budget before setting `auto_revised=true`. After all agents complete, re-read the revised ID list from the poll file (compression may have lost them during agent execution):
 
 ```bash
 python3 scripts/state.py read-ids tmp/rfe-poll-revise.txt
@@ -176,10 +176,10 @@ For each revised ID, verify the flag is correct:
 python3 scripts/check_revised.py artifacts/rfe-originals/<ID>.md artifacts/rfe-tasks/<ID>.md
 ```
 
-If the script reports files differ and frontmatter shows `revised=false`, fix it:
+If the script reports files differ and frontmatter shows `auto_revised=false`, fix it:
 
 ```bash
-python3 scripts/frontmatter.py set artifacts/rfe-reviews/<ID>-review.md revised=true
+python3 scripts/frontmatter.py set artifacts/rfe-reviews/<ID>-review.md auto_revised=true
 ```
 
 ## Step 4: Re-assess if Revised (max 2 cycles)
@@ -196,7 +196,7 @@ After all revise agents complete, check which IDs need re-assessment:
 python3 scripts/collect_recommendations.py --reassess $(python3 scripts/state.py read-ids tmp/review-all-ids.txt)
 ```
 
-Parse output for `REASSESS=` line. For each ID needing re-assessment (revised=true, pass=false), initialize the cycle counter on disk (set-default is safe if compression causes re-entry — it won't reset an existing counter):
+Parse output for `REASSESS=` line. For each ID needing re-assessment (auto_revised=true, pass=false), initialize the cycle counter on disk (set-default is safe if compression causes re-entry — it won't reset an existing counter):
 
 ```bash
 python3 scripts/state.py set-default tmp/review-config.yaml reassess_cycle=0
@@ -250,7 +250,7 @@ Launch all assess agents in parallel. Wait for all to complete — verify `/tmp/
 **4c. Launch review agents.** For each reassess ID, launch a **review agent** (model: opus, run_in_background: true):
 
 ```
-Read .claude/skills/rfe.review/prompts/review-and-revise-agent.md and follow all instructions. Substitute: {ID}=<ID>, {ASSESS_PATH}=/tmp/rfe-assess/single/<ID>.result.md, {FEASIBILITY_PATH}=artifacts/rfe-reviews/<ID>-feasibility.md, {FIRST_PASS}=false
+Read .claude/skills/rfe.review/prompts/review-agent.md and follow all instructions. Substitute: {ID}=<ID>, {ASSESS_PATH}=/tmp/rfe-assess/single/<ID>.result.md, {FEASIBILITY_PATH}=artifacts/rfe-reviews/<ID>-feasibility.md, {FIRST_PASS}=false
 ```
 
 Launch all review agents in parallel. Wait for all to complete (file existence check works because review files were removed in 4a).
@@ -271,7 +271,7 @@ python3 scripts/preserve_review_state.py restore <all_reassess_IDs_from_file>
 python3 scripts/filter_for_revision.py <all_reassess_IDs_from_file>
 ```
 
-Launch revise agents for the IDs returned (if any). Wait for all to complete, run post-processing revised flag fix (same as Step 3.5).
+Launch revise agents for the IDs returned (if any). Wait for all to complete, run post-processing auto_revised flag fix (same as Step 3.5).
 
 After cycle 2, stop regardless of results.
 

@@ -45,7 +45,7 @@ Do NOT recommend split when capabilities are delivery-coupled.
 ```bash
 python3 scripts/frontmatter.py set artifacts/rfe-reviews/{ID}-review.md \
     rfe_id={ID} score=<total> pass=<true/false> recommendation=<rec> \
-    feasibility=<feasible/infeasible> revised=<true/false> needs_attention=<true/false> \
+    feasibility=<feasible/infeasible> auto_revised=<true/false> needs_attention=<true/false> \
     scores.what=<n> scores.why=<n> scores.open_to_how=<n> scores.not_a_task=<n> scores.right_sized=<n>
 ```
 
