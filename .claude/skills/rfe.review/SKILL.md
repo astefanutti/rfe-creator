@@ -223,6 +223,7 @@ python3 scripts/state.py write-ids tmp/review-reassess-ids.txt <all_reassess_IDs
 ```bash
 python3 scripts/preserve_review_state.py save <all_reassess_IDs>
 rm artifacts/rfe-reviews/<ID>-review.md  # for each reassess ID
+rm /tmp/rfe-assess/single/<ID>.result.md  # for each reassess ID
 ```
 
 **4b. Re-run assessment.** For each reassess ID, prepare and launch an assess agent — this is the same process as Step 2:
