@@ -24,13 +24,13 @@ Comments file: artifacts/rfe-tasks/{ID}-comments.md (read if it exists)
 
 **Right-sizing is a recommendation, never auto-applied.** If right_sized scored 0 or 1, do NOT remove acceptance criteria or capabilities to force a different shape.
 
-**Do not invent missing evidence.** If WHY is flagged for missing named customers, flag the gap — do not fabricate evidence.
+**Do not invent missing evidence.** If WHY is flagged for missing named customers, do not fabricate evidence — set `needs_attention=true` in Step 3 so the author is notified.
 
 **Never use HTML comments (`<!-- -->`) in the task file.** HTML comments are invisible when rendered in Jira — authors will never see them. If you need to flag something for the author, set `needs_attention=true` and `needs_attention_reason` in frontmatter (Step 3), which gets posted as a visible Jira comment during submission.
 
 For each criterion the assessor flagged:
 - **Open to HOW**: Reframe flagged sections to remove prescriptive framing while preserving useful context
-- **WHY**: Strengthen with available evidence; flag gaps the author must fill
+- **WHY**: Strengthen with available evidence; if gaps remain, set `needs_attention=true` in Step 3 so the author is notified
 - **Right-sized**: Report only — do not split or remove scope
 - **WHAT / Not a task**: Follow assessor guidance if provided
 
