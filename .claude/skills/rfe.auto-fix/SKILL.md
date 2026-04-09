@@ -85,7 +85,7 @@ Parse YAML for: `type`, `command`, `prompt`, `ids_file`, `vars`, `poll_phase`, `
 
 **noop**: Skip to advance.
 
-**script**: Read pipeline state (`python3 scripts/pipeline_state.py status`). Substitute any `{key}` patterns in `command` with state values. If `ids_file` is set, read IDs from it and append as positional args. Run the resulting command.
+**script**: Run the `command` directly. If `ids_file` is set, read IDs from it and append as positional args.
 
 **agent**:
 
