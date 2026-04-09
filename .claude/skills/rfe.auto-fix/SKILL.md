@@ -94,11 +94,11 @@ Parse YAML for: `type`, `command`, `prompt`, `ids_file`, `vars`, `poll_phase`, `
 3. Compute wave size: `max_concurrent` (default `batch_size`) divided by `(1 + number of parallel entries)`, rounded down (minimum 1). Process remaining IDs in waves of that size:
 
    a. For each ID in the wave:
-      - If `pre_script`: run it with `{ID}` substituted.
-      - Launch a background Agent with `subagent_type` (if set):
-        `"Read <prompt> and follow all instructions exactly."`
-        Substitute all `vars` — replace `{ID}` with the actual ID in both keys and values.
-      - If `parallel` entries exist: for each entry, launch one additional background Agent using the entry's `prompt` with `{ID}` substituted.
+      - If `pre_script`: run it with `{ID}` replaced by the current ID.
+      - Build the agent environment string from `vars`: for each key-value pair, replace `{ID}` with the current ID, producing lines like `ID=RHAIRFE-1234`, `ASSESS_PATH=/tmp/rfe-assess/single/RHAIRFE-1234.result.md`, etc.
+      - Launch a background Agent with `subagent_type` (if set). The prompt is:
+        `"<vars as KEY=VALUE lines>\n\nRead <prompt> and follow all instructions exactly."`
+      - If `parallel` entries exist: for each entry, launch one additional background Agent using the same pattern with the entry's `prompt`.
 
    b. Poll until wave completes:
 
