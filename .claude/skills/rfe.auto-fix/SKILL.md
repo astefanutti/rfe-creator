@@ -11,7 +11,7 @@ You are a non-interactive RFE auto-fix pipeline. Do not ask questions or wait fo
 
 Parse `$ARGUMENTS` for:
 - `--jql "<query>"`, `--limit N`, `--batch-size N` (default 50), `--data-dir "<path>"`
-- `--headless`, `--announce-complete`
+- `--headless`, `--announce-complete`, `--reprocess`
 - Remaining arguments: explicit RFE IDs
 
 ### 1. Init
@@ -21,6 +21,8 @@ python3 scripts/pipeline_state.py init [--batch-size N] [--headless] [--announce
 ```
 
 ### 2. IDs
+
+**Reprocess mode** (`--reprocess`): Skip this step entirely. Verify `tmp/pipeline-all-ids.txt` exists from a prior run; if missing, stop with: "No prior IDs found. Run with --jql or explicit IDs first."
 
 **JQL mode** (`--jql`):
 
@@ -37,7 +39,7 @@ python3 scripts/state.py write-ids tmp/pipeline-all-ids.txt <IDs>
 python3 scripts/state.py write-ids tmp/pipeline-changed-ids.txt
 ```
 
-If no IDs and no JQL, stop with usage instructions.
+If no IDs and no JQL and not `--reprocess`, stop with usage instructions.
 
 ### 3. Bootstrap
 
@@ -48,6 +50,15 @@ bash scripts/bootstrap-assess-rfe.sh
 Retry once on failure. If retry fails, stop: "bootstrap failed."
 
 ### 4. Resume check + batch
+
+**Reprocess mode** (`--reprocess`): Skip resume check. Copy all IDs directly:
+
+```bash
+python3 scripts/state.py read-ids tmp/pipeline-all-ids.txt
+python3 scripts/state.py write-ids tmp/pipeline-process-ids.txt <all_IDs>
+```
+
+**Normal mode**:
 
 ```bash
 python3 scripts/check_resume.py --ids-file tmp/pipeline-all-ids.txt --changed-file tmp/pipeline-changed-ids.txt --output-file tmp/pipeline-process-ids.txt
