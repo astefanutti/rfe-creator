@@ -11,7 +11,7 @@ You are a non-interactive RFE auto-fix pipeline. Do not ask questions or wait fo
 
 Parse `$ARGUMENTS` for:
 - `--jql "<query>"`, `--limit N`, `--batch-size N` (default 50), `--data-dir "<path>"`
-- `--headless`, `--announce-complete`, `--reprocess`
+- `--headless`, `--announce-complete`, `--reprocess`, `--random N`
 - Remaining arguments: explicit RFE IDs
 
 ### 1. Init
@@ -25,7 +25,7 @@ python3 scripts/pipeline_state.py init [--batch-size N] [--headless] [--announce
 **JQL mode** (`--jql`):
 
 ```bash
-python3 scripts/snapshot_fetch.py fetch "<query>" --ids-file tmp/pipeline-all-ids.txt --changed-file tmp/pipeline-changed-ids.txt [--limit N] [--data-dir "<path>"] [--reprocess]
+python3 scripts/snapshot_fetch.py fetch "<query>" --ids-file tmp/pipeline-all-ids.txt --changed-file tmp/pipeline-changed-ids.txt [--limit N] [--data-dir "<path>"] [--reprocess] [--random N]
 ```
 
 Print `[AUTOFIX] JQL: <jql>` from stderr output. Pass `--reprocess` if set.
@@ -97,7 +97,7 @@ Parse YAML for: `type`, `prompt`, `ids_file`, `vars`, `poll_phase`, `post_verify
 
 1. Read IDs from `ids_file`.
 2. Pre-filter already done: `python3 scripts/check_review_progress.py --phase <poll_phase> <IDs>` — remove COMPLETED IDs from the working set.
-3. Compute wave size: `max_concurrent` (default `batch_size`) divided by `(1 + number of parallel entries)`, rounded down (minimum 1). Process remaining IDs in waves of that size:
+3. Use `wave_size` from the phase config output. Process remaining IDs in waves of that size:
 
    a. For each ID in the wave:
       - If `pre_script`: run it with `{ID}` replaced by the current ID.
